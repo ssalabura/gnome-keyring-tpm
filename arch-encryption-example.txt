@@ -1,0 +1,58 @@
+; partycje 1GB + 19GB
+
+ping archlinux.org
+
+cryptsetup open --type plain -d /dev/urandom /dev/sda to_be_wiped
+dd if=/dev/zero of=/dev/mapper/to_be_wiped status=progress
+cryptsetup close to_be_wiped
+
+cfdisk -> dos
+	New -> 1GB, primary
+	New -> 19GB, primary
+	Write -> yes
+	Quit
+
+cryptsetup -y -v luksFormat /dev/sda2
+	pass1
+cryptsetup open /dev/sda2 cryptroot
+mkfs.ext4 /dev/mapper/cryptroot
+mount /dev/mapper/cryptroot /mnt
+mkfs.ext4 /dev/sda1
+mkdir /mnt/boot
+mount /dev/sda1 /mnt/boot
+
+pacstrap /mnt base linux linux-firmware
+genfstab -U /mnt >> /mnt/etc/fstab 
+arch-chroot /mnt
+
+ln -sf /usr/share/zoneinfo/Europe/Warsaw /etc/localtime
+hwclock --systohc
+locale-gen
+pacman -S vim
+vim /etc/locale.conf
+	LANG=en_US.UTF-8
+vim /etc/hostname
+	arch-encrypted
+vim /etc/mkinitcpio.conf
+	HOOKS=(base udev autodetect keyboard keymap consolefont modconf block encrypt filesystems fsck)
+mkinitcpio -P
+passwd
+	pass2
+pacman -S grub os-prober
+grub-install /dev/sda
+vim /etc/default/grub
+	odkomentować "GRUB_ENABLE_CRYPTODISK=y"
+	dodać "cryptdevice=/dev/sda2:root" do linii "GRUB_CMDLINE_LINUX_DEFAULT="...""
+grub-mkconfig -o /boot/grub/grub.cfg
+exit
+reboot
+
+
+
+
+
+
+
+
+
+
