@@ -14,7 +14,7 @@ Zgodnie z [wiki Arch Linuxa](https://wiki.archlinux.org/index.php/Dm-crypt/Drive
 ```
 cryptsetup open --type plain -d /dev/urandom /dev/<block-device> to_be_wiped
 ```
-gdzie <block-device> jest nazwą dysku w postaci sdX, który chcemy wyczyścić. 
+gdzie \<block-device\> jest nazwą dysku w postaci sdX, który chcemy wyczyścić. 
 Następnie za pomocą ```lsblk``` upewniamy się, że powyższa komenda utworzyła tymczasowy kontener _to_be_wiped_ na odpowiedniej partycji.
 Dalej, wykonujemy czyszczenie dysku:
 ```
@@ -43,7 +43,7 @@ W celu zmiany domyślnych parametrów można zapoznać się z [opcjami dla szyfr
 
 Dalej sprawdzamy, czy montowanie i mapowanie dysku działa tak, jak powinno:
 ```
-mount /mnt
+umount /mnt
 cryptsetup close cryptroot
 cryptsetup open /dev/sda2 cryptroot
 mount /dev/mapper/cryptroot /mnt
@@ -75,6 +75,11 @@ HOOKS=(base udev autodetect keyboard keymap consolefont modconf block encrypt fi
 ```
 W szczególności, należy się upewnić, że na liście znajdują się **udev**, **keyboard**, **keymap** i **encrypt**
 
+Po edycji tego pliku należy zgodnie z tutorialem na wiki Archlinuxa wykonać
+```
+mkinitcpio -P
+```
+
 ## bootloader
 W konfiguracji bootloadera należy zadbać o to, aby ustawić następujący parametr kernela:
 ```
@@ -84,7 +89,7 @@ gdzie device-UUID jest UUID partycji systemowej /dev/sda2
 
 W przypadku, gdy bootloader to **GRUB**, wystarczy edytować plik ```/etc/default/grub``` i wykonać następujące czynności:
 * odkomentować linię ```GRUB_ENABLE_CRYPTODISK=y```
-* edytować linię ```GRUB_CMDLINE_LINUX_DEFAULT="..."``` dodając do niej ```cryptdevice=/dev/sda1:root```
+* edytować linię ```GRUB_CMDLINE_LINUX_DEFAULT="..."``` dodając do niej ```cryptdevice=/dev/sda2:root```. Alternatywnie możemy zamiast tego dodać ```cryptdevice=UUID=<device-UUID>:root```, dzięki czemu zaszyfrowana partycja /dev/sda2 będzie rozpoznawana po UUID
 
 ## Uruchomienie systemu
 Po dokończeniu instalacji, uruchamiamy system ponownie. Po wybraniu w bootloaderze odpowiedniego systemu otrzymamy komunikat, że musimy wprowadzić hasło do 
